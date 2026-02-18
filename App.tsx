@@ -1,38 +1,30 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
+ * Venered - Social Network App
+ * Fase 0: Authentication + Navigation
  */
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import React from 'react';
+import { StatusBar, StyleSheet } from 'react-native';
 import {
   SafeAreaProvider,
-  useSafeAreaInsets,
+  initialWindowMetrics,
 } from 'react-native-safe-area-context';
+import { AuthProvider } from './src/context/AuthContext';
+import { RootNavigator } from './src/navigation/RootNavigator';
+import { colors } from './src/theme/colors';
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.background}
+        translucent={false}
       />
-    </View>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
