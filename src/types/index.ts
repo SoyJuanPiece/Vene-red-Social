@@ -1,3 +1,5 @@
+import type React from 'react';
+
 // Core Types
 export interface User {
   id: string;

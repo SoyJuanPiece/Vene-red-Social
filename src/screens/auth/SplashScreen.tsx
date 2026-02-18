@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
   ActivityIndicator,
-  Dimensions,
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { Text } from '../../components/ui/Text';

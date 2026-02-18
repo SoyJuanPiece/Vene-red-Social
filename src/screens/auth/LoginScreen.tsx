@@ -5,14 +5,22 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Text } from '../../components/ui/Text';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
+
+type AuthStackParamList = {
+  Splash: undefined;
+  Login: undefined;
+  SignUp: undefined;
+};
+
+type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 const styles = StyleSheet.create({
   container: {
@@ -82,13 +90,7 @@ const styles = StyleSheet.create({
   },
 });
 
-interface LoginScreenProps {
-  onSignUpPress?: () => void;
-}
-
-export const LoginScreen: React.FC<LoginScreenProps> = ({
-  onSignUpPress,
-}) => {
+export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -192,7 +194,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             label="Registrarse"
             variant="text"
             size="small"
-            onPress={onSignUpPress}
+            onPress={() => navigation.navigate('SignUp')}
             style={{ paddingHorizontal: 0 }}
           />
         </View>

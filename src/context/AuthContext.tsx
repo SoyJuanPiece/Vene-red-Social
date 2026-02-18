@@ -1,7 +1,6 @@
 import React, {
   createContext,
   useContext,
-  useState,
   useEffect,
   useCallback,
   useReducer,
@@ -73,8 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isSignout: false,
   });
 
-  const [error, setError] = useState<string>('');
-
   // Restaurar sesión al iniciar app
   useEffect(() => {
     const bootstrapAsync = async () => {
@@ -98,19 +95,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     signIn: useCallback(async (credentials: LoginCredentials) => {
       try {
-        setError('');
         const session = await AuthService.signIn(credentials);
         dispatch({ type: 'SIGN_IN', payload: session });
       } catch (error: any) {
-        const errorMessage = error.message || 'Error iniciando sesión';
-        setError(errorMessage);
         throw error;
       }
     }, []),
 
     signUp: useCallback(async (data: SignUpData) => {
       try {
-        setError('');
         await AuthService.signUp(data);
         // Auto login después de signup
         const session = await AuthService.signIn({
@@ -119,27 +112,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
         dispatch({ type: 'SIGN_UP', payload: session });
       } catch (error: any) {
-        const errorMessage = error.message || 'Error registrándose';
-        setError(errorMessage);
         throw error;
       }
     }, []),
 
     signOut: useCallback(async () => {
       try {
-        setError('');
         await AuthService.signOut();
         dispatch({ type: 'SIGN_OUT' });
       } catch (error: any) {
-        const errorMessage = error.message || 'Error cerrando sesión';
-        setError(errorMessage);
         throw error;
       }
     }, []),
 
     restoreToken: useCallback(async () => {
       try {
-        setError('');
         const session = await AuthService.restoreSession();
         dispatch({ type: 'RESTORE_TOKEN', payload: session });
       } catch (error: any) {

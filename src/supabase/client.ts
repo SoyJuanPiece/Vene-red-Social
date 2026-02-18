@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { Alert } from 'react-native';
 import { mockSupabase } from '../__mocks__/supabase';
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || '';

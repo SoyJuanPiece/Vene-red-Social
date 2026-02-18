@@ -6,8 +6,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Text } from './Text';
-import { colors } from '../theme/colors';
-import { AvatarProps } from '../types';
+import { colors } from '../../theme/colors';
+import { AvatarProps } from '../../types';
 
 const styles = StyleSheet.create({
   container: {
@@ -47,14 +47,18 @@ export const Avatar: React.FC<AvatarProps> = ({
   hasStory = false,
   style,
 }) => {
-  const sizeStyle = styles[size as keyof typeof styles];
+  const sizeStyle = styles[size as keyof typeof styles] as {
+    width: number;
+    height: number;
+    borderRadius: number;
+  };
   const borderRadius = (sizeStyle.width as number) / 2;
   
   const avatarStyle: ViewStyle = {
     ...styles.container,
     ...sizeStyle,
     borderRadius,
-    ...(hasStory && styles.storyRing),
+    ...((hasStory || showStoryRing) && styles.storyRing),
   };
 
   // Calcular tamaño del texto basado en size

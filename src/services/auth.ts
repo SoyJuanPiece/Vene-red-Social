@@ -1,4 +1,4 @@
-import { supabase } from '../supabase/client';
+import supabase from '../supabase/client';
 import { User, LoginCredentials, SignUpData, AuthSession } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

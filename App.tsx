@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { StatusBar, StyleSheet } from 'react-native';
+import { StatusBar } from 'react-native';
 import {
   SafeAreaProvider,
   initialWindowMetrics,
@@ -27,11 +27,5 @@ function App() {
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;

@@ -7,10 +7,10 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { spacing } from '../theme/spacing';
-import { ButtonProps } from '../types';
+import { colors } from '../../theme/colors';
+import { typography } from '../../theme/typography';
+import { spacing } from '../../theme/spacing';
+import { ButtonProps } from '../../types';
 
 const styles = StyleSheet.create({
   button: {
@@ -97,19 +97,46 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   style,
 }) => {
+  const sizeStyles = {
+    small: styles.small,
+    medium: styles.medium,
+    large: styles.large,
+  } as const;
+
+  const variantStyles = {
+    primary: styles.primary,
+    secondary: styles.secondary,
+    text: styles.text,
+    destructive: styles.destructive,
+  } as const;
+
+  const pressedVariantStyles = {
+    primary: styles.primaryPressed,
+    secondary: styles.secondaryPressed,
+    text: styles.textPressed,
+    destructive: styles.destructivePressed,
+  } as const;
+
+  const textVariantStyles = {
+    primary: styles.primaryText,
+    secondary: styles.secondaryText,
+    text: styles.textVariantText,
+    destructive: styles.destructiveText,
+  } as const;
+
   const getBackgroundStyle = (pressed: boolean): ViewStyle => {
-    const baseStyle = styles[variant];
+    const baseStyle = variantStyles[variant];
     if (disabled) return { ...baseStyle, ...styles.disabledButton };
     
     if (pressed) {
-      const pressedStyle = styles[`${variant}Pressed` as keyof typeof styles];
+      const pressedStyle = pressedVariantStyles[variant];
       return { ...baseStyle, ...pressedStyle };
     }
     return baseStyle;
   };
 
   const getTextStyle = (): TextStyle => {
-    const textStyle = styles[`${variant}Text` as keyof typeof styles];
+    const textStyle = textVariantStyles[variant];
     return { ...styles.buttonText, ...textStyle };
   };
 
@@ -119,7 +146,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.button,
-        styles[size as keyof typeof styles],
+        sizeStyles[size],
         getBackgroundStyle(pressed),
         fullWidth && styles.fullWidth,
         style,

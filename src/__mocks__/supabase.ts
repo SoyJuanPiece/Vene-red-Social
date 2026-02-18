@@ -1,9 +1,11 @@
-/**
+/*
  * Mock Supabase Client para desarrollo y testing
- * Simula respuestas de Supabase sin conexión real
+ * Simula respuestas sin conexion real
  */
 
-import { User, AuthSession, LoginCredentials, SignUpData } from '../types';
+import { User, AuthSession, LoginCredentials } from '../types';
+
+const nowIso = () => new Date().toISOString();
 
 // Mock users database
 const mockUsers: Record<string, User> = {
@@ -12,33 +14,100 @@ const mockUsers: Record<string, User> = {
     email: 'demo@example.com',
     username: 'demousuario',
     display_name: 'Usuario Demo',
-    bio: 'Esta es mi bio de demostración',
-    avatar_url: null,
-    website: null,
+    bio: 'Esta es mi bio de demostracion',
     is_private: false,
     is_verified: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: nowIso(),
+    updated_at: nowIso(),
   },
 };
 
 // Simulated session storage
 let currentSession: AuthSession | null = null;
 
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+
+const buildSession = (user: User): AuthSession => ({
+  user,
+  access_token: `mock_access_${Date.now()}`,
+  refresh_token: `mock_refresh_${Date.now()}`,
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
+});
+
+// Minimal query builder for users table
+const usersQuery = () => {
+  let userId: string | null = null;
+  let updatePayload: Partial<User> | null = null;
+
+  return {
+    select: () => ({
+      eq: (_field: string, value: string) => {
+        userId = value;
+        return {
+          single: async () => {
+            await sleep(100);
+            const user = mockUsers[userId || ''] || null;
+            if (!user) {
+              return { data: null, error: { code: 'PGRST116' } };
+            }
+            return { data: user, error: null };
+          },
+        };
+      },
+    }),
+    insert: async (data: Partial<User>) => {
+      await sleep(100);
+      const id = data.id || `user-${Date.now()}`;
+      mockUsers[id] = {
+        id,
+        email: data.email || 'demo@example.com',
+        username: data.username || 'usuario',
+        display_name: data.display_name || 'Usuario',
+        bio: data.bio,
+        avatar_url: data.avatar_url,
+        website: data.website,
+        is_private: data.is_private ?? false,
+        is_verified: data.is_verified ?? false,
+        created_at: nowIso(),
+        updated_at: nowIso(),
+      } as User;
+      return { data: mockUsers[id], error: null };
+    },
+    update: (payload: Partial<User>) => {
+      updatePayload = payload;
+      return {
+        eq: (_field: string, value: string) => {
+          userId = value;
+          return {
+            select: () => ({
+              single: async () => {
+                await sleep(100);
+                if (!userId || !mockUsers[userId]) {
+                  return { data: null, error: { code: 'PGRST116' } };
+                }
+                mockUsers[userId] = {
+                  ...mockUsers[userId],
+                  ...updatePayload,
+                  updated_at: nowIso(),
+                } as User;
+                return { data: mockUsers[userId], error: null };
+              },
+            }),
+          };
+        },
+      };
+    },
+  };
+};
+
 export const mockSupabase = {
   auth: {
     signUp: async (data: { email: string; password: string; options?: any }) => {
-      console.log('[MOCK] signup:', data.email);
-      await new Promise((r) => setTimeout(r, 500)); // Simulate network delay
-
-      // Validation
+      await sleep(200);
       if (!data.email || !data.password) {
-        return {
-          data: null,
-          error: new Error('Email and password required'),
-        };
+        return { data: null, error: new Error('Email and password required') };
       }
-
       if (data.password.length < 6) {
         return {
           data: null,
@@ -46,232 +115,88 @@ export const mockSupabase = {
         };
       }
 
-      // Generate mock user
-      const newUserId = `user-${Date.now()}`;
-      const newUser: any = {
-        id: newUserId,
+      const newUser: User = {
+        id: `user-${Date.now()}`,
         email: data.email,
-        user_metadata: data.options?.data || {},
-      };
-
-      // Create profile in mock database
-      mockUsers[newUserId] = {
-        id: newUserId,
-        email: data.email,
-        username: data.options?.data?.username || data.email.split('@')[0],
-        display_name: data.options?.data?.display_name || 'New User',
-        bio: null,
-        avatar_url: null,
-        website: null,
+        username: data.options?.data?.username || 'nuevo',
+        display_name: data.options?.data?.display_name || 'Nuevo Usuario',
         is_private: false,
         is_verified: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: nowIso(),
+        updated_at: nowIso(),
       };
 
+      mockUsers[newUser.id] = newUser;
       return {
-        data: {
-          user: newUser,
-          session: null,
-        },
+        data: { user: { id: newUser.id } },
         error: null,
       };
     },
 
-    signInWithPassword: async (data: LoginCredentials) => {
-      console.log('[MOCK] signIn:', data.email);
-      await new Promise((r) => setTimeout(r, 800)); // Simulate network delay
-
-      // Mock validation
-      if (!data.email || !data.password) {
-        return {
-          data: null,
-          error: new Error('Invalid credentials'),
-        };
+    signInWithPassword: async (credentials: LoginCredentials) => {
+      await sleep(200);
+      const user = Object.values(mockUsers).find(
+        (u) => u.email === credentials.email
+      );
+      if (!user) {
+        return { data: null, error: new Error('invalid_credentials') };
       }
 
-      // For demo, any email/password works
-      // In real app, this would validate against Supabase
-      const demoEmail = 'demo@example.com';
-      const demoPassword = 'password123';
-
-      let mockUser: any;
-      if (data.email === demoEmail && data.password === demoPassword) {
-        // Return demo user
-        mockUser = mockUsers['user-0123'];
-      } else {
-        // Return a generated user for any other credentials (for testing)
-        const testUserId = `user-test-${Date.now()}`;
-        mockUser = {
-          id: testUserId,
-          email: data.email,
-          username: data.email.split('@')[0],
-          display_name: data.email.split('@')[0],
-          bio: null,
-          avatar_url: null,
-          website: null,
-          is_private: false,
-          is_verified: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        mockUsers[testUserId] = mockUser;
-      }
-
-      const fakeSession: any = {
-        user: {
-          id: mockUser.id,
-          email: mockUser.email,
-        },
-        access_token: `fake-jwt-${Date.now()}`,
-        refresh_token: `fake-refresh-${Date.now()}`,
-        expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
-        expires_in: 3600,
-        token_type: 'bearer',
-      };
-
-      currentSession = {
-        user: mockUser,
-        access_token: fakeSession.access_token,
-        refresh_token: fakeSession.refresh_token,
-        expires_at: fakeSession.expires_at,
-      };
-
-      return {
-        data: { session: fakeSession, user: fakeSession.user },
-        error: null,
-      };
+      const session = buildSession(user);
+      currentSession = session;
+      return { data: { session }, error: null };
     },
 
     signOut: async () => {
-      console.log('[MOCK] signOut');
-      await new Promise((r) => setTimeout(r, 300));
+      await sleep(100);
       currentSession = null;
       return { error: null };
     },
 
     getUser: async () => {
-      console.log('[MOCK] getUser');
-      if (currentSession) {
-        return {
-          data: { user: currentSession.user },
-          error: null,
-        };
-      }
-      return { data: { user: null }, error: null };
-    },
-
-    refreshSession: async (data: { refresh_token: string }) => {
-      console.log('[MOCK] refreshSession');
-      await new Promise((r) => setTimeout(r, 300));
-
-      if (!currentSession) {
-        return { data: null, error: new Error('No session to refresh') };
-      }
-
-      const newSession: any = {
-        user: currentSession.user,
-        access_token: `fake-jwt-${Date.now()}`,
-        refresh_token: `fake-refresh-${Date.now()}`,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        expires_in: 3600,
-        token_type: 'bearer',
-      };
-
-      currentSession = {
-        user: currentSession.user,
-        access_token: newSession.access_token,
-        refresh_token: newSession.refresh_token,
-        expires_at: newSession.expires_at,
-      };
-
+      await sleep(50);
       return {
-        data: { session: newSession, user: newSession.user },
+        data: { user: currentSession?.user || null },
         error: null,
       };
     },
 
-    resetPasswordForEmail: async (email: string) => {
-      console.log('[MOCK] resetPassword:', email);
-      await new Promise((r) => setTimeout(r, 500));
-      return { data: {}, error: null };
-    },
-
-    updateUser: async (data: any) => {
-      console.log('[MOCK] updateUser', data);
-      if (currentSession) {
-        return {
-          data: { user: currentSession.user },
-          error: null,
-        };
+    refreshSession: async (_data: { refresh_token: string }) => {
+      await sleep(150);
+      if (!currentSession) {
+        return { data: { session: null }, error: null };
       }
-      return { data: null, error: new Error('No user logged in') };
+      const session = buildSession(currentSession.user);
+      currentSession = session;
+      return { data: { session }, error: null };
     },
 
-    onAuthStateChange: (callback: (event: string, session: any) => void) => {
-      console.log('[MOCK] onAuthStateChange listener registered');
-      // Return unsubscribe function
-      return { data: { subscription: { unsubscribe: () => {} } } };
+    updateUser: async (_data: { password: string }) => {
+      await sleep(100);
+      return { error: null };
+    },
+
+    resetPasswordForEmail: async (_email: string) => {
+      await sleep(100);
+      return { error: null };
     },
   },
 
-  from: (table: string) => ({
-    select: () => ({
-      eq: () => ({
-        single: async () => {
-          console.log('[MOCK] query:', table);
-          await new Promise((r) => setTimeout(r, 300));
-
-          if (table === 'users' && currentSession) {
-            return {
-              data: currentSession.user,
-              error: null,
-            };
-          }
-
-          return { data: null, error: new Error('Not found') };
-        },
-      }),
-    }),
-
-    insert: async (data: any) => {
-      console.log('[MOCK] insert into', table, data);
-      await new Promise((r) => setTimeout(r, 300));
-      return { data: [data], error: null };
-    },
-
-    update: async (data: any) => ({
-      eq: async () => ({
-        select: async () => ({
-          single: async () => {
-            console.log('[MOCK] update', table, data);
-            await new Promise((r) => setTimeout(r, 300));
-            return { data, error: null };
-          },
+  from: (table: string) => {
+    if (table === 'users') return usersQuery();
+    return {
+      select: () => ({
+        eq: () => ({
+          single: async () => ({ data: null, error: null }),
         }),
       }),
-    }),
-  }),
-
-  storage: {
-    from: (bucket: string) => ({
-      upload: async (path: string, file: any) => {
-        console.log('[MOCK] upload to', bucket, path);
-        await new Promise((r) => setTimeout(r, 1000));
-        return {
-          data: { path: `${bucket}/${path}` },
-          error: null,
-        };
-      },
-      getPublicUrl: (path: string) => {
-        console.log('[MOCK] getPublicUrl', bucket, path);
-        return {
-          data: {
-            publicUrl: `https://mock-cdn.example.com/${bucket}/${path}`,
-          },
-        };
-      },
-    }),
+      insert: async () => ({ data: null, error: null }),
+      update: () => ({
+        eq: () => ({
+          select: () => ({ single: async () => ({ data: null, error: null }) }),
+        }),
+      }),
+    };
   },
 };
 

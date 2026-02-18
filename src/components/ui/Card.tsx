@@ -3,11 +3,9 @@ import {
   View,
   StyleSheet,
   Pressable,
-  ViewStyle,
 } from 'react-native';
-import { colors } from '../theme/colors';
-import { spacing } from '../theme/spacing';
-import { CardProps } from '../types';
+import { colors } from '../../theme/colors';
+import { CardProps } from '../../types';
 
 const styles = StyleSheet.create({
   // Variants

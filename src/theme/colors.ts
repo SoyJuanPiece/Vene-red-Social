@@ -42,17 +42,14 @@ export const colors = {
 
 // Dark Theme (para futuro)
 export const darkColors = {
+  // Reutilizar colors de light
+  ...colors,
   background: '#121212',
   surface: '#1E1E1E',
   surfaceAlt: '#2D2D2D',
-  
   textPrimary: '#FFFFFF',
   textSecondary: '#B0B0B0',
   textTertiary: '#707070',
-  
   border: '#2D2D2D',
   borderDark: '#3D3D3D',
-  
-  // Reutilizar colors de light
-  ...colors,
 };

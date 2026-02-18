@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text as RNText, StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
-import { typography, TypographyVariant } from '../theme/typography';
-import { TextProps } from '../types';
+import { colors } from '../../theme/colors';
+import { typography, TypographyVariant } from '../../theme/typography';
+import { TextProps } from '../../types';
 
 const styles = StyleSheet.create({
   text: {

@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -13,6 +14,14 @@ import { Text } from '../../components/ui/Text';
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme/spacing';
 import { SignUpData } from '../../types';
+
+type AuthStackParamList = {
+  Splash: undefined;
+  Login: undefined;
+  SignUp: undefined;
+};
+
+type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
 const styles = StyleSheet.create({
   container: {
@@ -76,13 +85,7 @@ const styles = StyleSheet.create({
   },
 });
 
-interface SignUpScreenProps {
-  onLoginPress?: () => void;
-}
-
-export const SignUpScreen: React.FC<SignUpScreenProps> = ({
-  onLoginPress,
-}) => {
+export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const { signUp } = useAuth();
   const [form, setForm] = useState({
     email: '',
@@ -259,7 +262,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
             label="Inicia sesión"
             variant="text"
             size="small"
-            onPress={onLoginPress}
+            onPress={() => navigation.navigate('Login')}
             style={{ paddingHorizontal: 0 }}
             disabled={loading}
           />

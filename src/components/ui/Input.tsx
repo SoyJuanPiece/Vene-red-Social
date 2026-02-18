@@ -3,14 +3,13 @@ import {
   TextInput as RNTextInput,
   View,
   StyleSheet,
-  ViewStyle,
   TextStyle,
 } from 'react-native';
 import { Text } from './Text';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { spacing } from '../theme/spacing';
-import { InputProps } from '../types';
+import { colors } from '../../theme/colors';
+import { typography } from '../../theme/typography';
+import { spacing } from '../../theme/spacing';
+import { InputProps } from '../../types';
 
 const styles = StyleSheet.create({
   container: {

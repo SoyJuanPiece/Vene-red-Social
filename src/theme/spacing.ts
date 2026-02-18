@@ -1,78 +1,32 @@
-// Typography - Escala tipográfica basada en 4px
-export const typography = {
-  // Headers
-  h1: {
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: '700' as const,
-    letterSpacing: -0.5,
-  },
-  h2: {
-    fontSize: 24,
-    lineHeight: 32,
-    fontWeight: '700' as const,
-    letterSpacing: -0.3,
-  },
-  h3: {
-    fontSize: 20,
-    lineHeight: 28,
-    fontWeight: '600' as const,
-    letterSpacing: -0.2,
-  },
-  h4: {
-    fontSize: 18,
-    lineHeight: 24,
-    fontWeight: '600' as const,
-    letterSpacing: 0,
-  },
-  
-  // Body
-  bodyLarge: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '400' as const,
-    letterSpacing: 0,
-  },
-  body: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '400' as const,
-    letterSpacing: 0,
-  },
-  bodySmall: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '400' as const,
-    letterSpacing: 0,
-  },
-  
-  // Special
-  caption: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '500' as const,
-    letterSpacing: 0.2,
-  },
-  button: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600' as const,
-    letterSpacing: 0.5,
-  },
-  label: {
-    fontSize: 11,
-    lineHeight: 14,
-    fontWeight: '600' as const,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase' as const,
-  },
-};
+// Spacing - Grid 8pt
+export const spacing = {
+  xs: 4, // 0.25rem
+  sm: 8, // 0.5rem
+  md: 16, // 1rem
+  lg: 24, // 1.5rem
+  xl: 32, // 2rem
+  xxl: 48, // 3rem
+  xxxl: 64, // 4rem
+} as const;
 
-export type TypographyVariant = keyof typeof typography;
+export type SpacingSize = keyof typeof spacing;
 
-export const fontWeights = {
-  regular: '400',
-  medium: '500',
-  semibold: '600',
-  bold: '700',
+// Aliases comunes
+export const padding = {
+  container: spacing.md, // 16px
+  card: spacing.md, // 16px
+  section: spacing.lg, // 24px
+  screen: spacing.md, // 16px horizontal
+} as const;
+
+export const margin = {
+  component: spacing.md,
+  section: spacing.lg,
+} as const;
+
+export const gap = {
+  tight: spacing.xs, // 4px
+  close: spacing.sm, // 8px
+  normal: spacing.md, // 16px
+  loose: spacing.lg, // 24px
 } as const;
